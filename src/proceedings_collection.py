@@ -1,19 +1,18 @@
+import shutil
 from lxml import etree
 import csv
 from tqdm import tqdm
 import sys
 import os
-from zipfile import ZipFile 
-from zipfile import ZIP_DEFLATED
+import gzip
+from urllib.request import urlretrieve
 
-DBLP_XML = 'data/dblp-23-02-2023.xml'
-DBLP_XML_ZIP = 'data/dblp-23-02-2023.zip'
+DBLP_XML = 'data/dblp-2024-06-02.xml'
 
-DBLP_DTD = 'data/dblp.dtd'
-# DBLP_DTD = 'data/dblp-new.dtd'
+DBLP_XML_ZIP = 'data/dblp-2024-06-02.xml.gz'
 
 YEAR_MIN = 2012
-YEAR_MAX = 2023 # Although you may expect this to be 2022, there is a non-zero set of papers which list their publication year as 2023, but are actually available online in 2022, so we assess those edge cases through our exclusion criteria separately.
+YEAR_MAX = 2025
 
 SEAMS_FIX = True
 #I included the second / because otherwise if there is a conference e.g. icrac it will get included.
@@ -45,10 +44,19 @@ SAS_VENUES = tuple([
     'journals/taas/'
 ])
 
+REVIEW_VENUES = tuple(
+    [
+        'journals/sosym/',
+        'journals/tse/',
+        'journals/jss/'
+    ]
+)
+
 venue_to_category = {
     SA_VENUES : "Software_Architecture",
     RO_VENUES : "Robotics",
-    SAS_VENUES : "Self-Adaptive_Systems"
+    SAS_VENUES : "Self-Adaptive_Systems",
+    REVIEW_VENUES : "Suggested by Review"
 }
 
 ARCHITECTURE_KWORDS = ["architect"]
@@ -66,26 +74,34 @@ venue_to_words = {
 }
 
 filter_by_title = True
-out_csv_title = "data/all"
+out_csv_title = "data/revise_all"
+do_and = False
 
 
 # Iterate over a large-sized xml file without the need to store it in memory in
 # full. Yields every next element. Source:
 # https://stackoverflow.com/questions/9856163/using-lxml-and-iterparse-to-parse-a-big-1gb-xml-file
 def iterate_xml(xmlfile):
-    etree.DTD(file=DBLP_DTD)
-    doc = etree.iterparse(xmlfile, events=('start', 'end'), load_dtd=True, resolve_entities=True, encoding='utf-8')
+    doc = etree.iterparse(xmlfile, events=('start', 'end'), load_dtd=True, dtd_validation=True, resolve_entities=True)
+
     _, root = next(doc)
     start_tag = None
-    for event, element in tqdm(doc):
-        if event == 'start' and start_tag is None:
-            start_tag = element.tag
-        if event == 'end' and element.tag == start_tag:
-            yield element
-            start_tag = None
-            root.clear()
+    try:
+        for event, element in tqdm(doc):
+            if event == 'start' and start_tag is None:
+                start_tag = element.tag
+            if event == 'end' and element.tag == start_tag:
+                yield element
+                start_tag = None
+                root.clear()
+    except etree.XMLSyntaxError as e:
+        print(event)
+        print(element)
+        print(doc)
+        raise e
 
-def title_criteria(key, venue_list, title, counter, explain=False, dblp_entry=None): 
+
+def title_criteria(key, venue_list, title, counter, explain=False, dblp_entry=None, keywords_and=False): 
     title_lowered = title.lower()
     title_keywords = venue_to_words[venue_list]
     category = ""
@@ -93,7 +109,12 @@ def title_criteria(key, venue_list, title, counter, explain=False, dblp_entry=No
         print("keywords " + str(title_keywords) + "found in " + str(title) + "is " + str(any(keyword in title for keyword in title_keywords)))
         print("key starts with " + str(venue_list) + "in " + str(key) + "is " + str(key.startswith(venue_list)))
     
-    return_value = ((key.startswith(venue_list) or (SEAMS_FIX and key.startswith("conf/icse") and (dblp_entry is not None) and ("SEAMS" in dblp_entry.find('booktitle').text)) ) and any(keyword in title_lowered for keyword in title_keywords))
+
+    if(not keywords_and):
+        return_value = ((key.startswith(venue_list) or (SEAMS_FIX and key.startswith("conf/icse") and (dblp_entry is not None) and ("SEAMS" in dblp_entry.find('booktitle').text)) ) and any(keyword in title_lowered for keyword in title_keywords))
+    else:
+        return_value = ((key.startswith(venue_list) or (SEAMS_FIX and key.startswith("conf/icse") and (dblp_entry is not None) and ("SEAMS" in dblp_entry.find('booktitle').text)) ) and all(keyword in title_lowered for keyword in title_keywords))
+
     if(return_value): 
         counter[0]+=1
         category =  venue_to_category[venue_list]
@@ -141,6 +162,7 @@ def parse_entries():
     ro_counter = [0]
     sa_counter = [0]
     sas_counter = [0]
+
     for dblp_entry in iterate_xml(DBLP_XML):
         key = dblp_entry.get('key')
         year_subelem = dblp_entry.find('year')
@@ -151,15 +173,15 @@ def parse_entries():
 
 
             if(filter_by_title):
-                match_robotics = title_criteria(key,RO_VENUES, title, ro_counter)
-                match_software = title_criteria(key,SA_VENUES, title, sa_counter)
-                match_adaptive = title_criteria(key, SAS_VENUES, title, sas_counter, dblp_entry=dblp_entry)
+                match_robotics = title_criteria(key,RO_VENUES, title, ro_counter,keywords_and=do_and)
+                match_software = title_criteria(key,SA_VENUES, title, sa_counter,keywords_and=do_and)
+                match_adaptive = title_criteria(key, SAS_VENUES, title, sas_counter, dblp_entry=dblp_entry,keywords_and=do_and)
             else:
                 match_robotics = venue_criteria(key,RO_VENUES, ro_counter)
                 match_software = venue_criteria(key,SA_VENUES, sa_counter)
                 match_adaptive = venue_criteria(key, SAS_VENUES, sas_counter, dblp_entry=dblp_entry)
-
-            matched_criteria = match_robotics or match_software or match_adaptive
+        
+            matched_criteria = match_robotics or match_software or match_adaptive # or match_review
             if(matched_criteria): #an any with extra steps to get the return value in a variable.
                 # add to result.
                 # Merge the names of all authors of the work.
@@ -189,6 +211,7 @@ def parse_entries():
     print("TOTAL HITS : " + str(HITS) + " ROBOTICS HITS: " + str(ro_counter[0]) + " ARCHITECTURE HITS: " + str(sa_counter[0]) + " SAS HITS: " + str(sas_counter[0]), end="")
     print("")
 
+
 def extract_dblp():
     if(os.path.exists(DBLP_XML)):
         print("Loading existing dblp xml file...")
@@ -196,12 +219,23 @@ def extract_dblp():
     elif(os.path.exists(DBLP_XML_ZIP)):
         print("Unzipping existing dblp zip file (this should only happen the first time)...")
 
-        with ZipFile(DBLP_XML_ZIP, 'r', compression=ZIP_DEFLATED, allowZip64=True) as zObject: 
-            zObject.extractall( 
-                path="data/") 
-            return
+        with gzip.open(DBLP_XML_ZIP, 'rb') as f_in:
+            with open(DBLP_XML, 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+        
     else:
-        raise Exception("For some reason, neither the xml or zip version of the dblp database could be found")
+        try:
+            def reporthook(block_num, block_size, total_size):
+                if t.total is None and total_size > 0:
+                    t.total = total_size
+                t.update(block_size)
+
+            with tqdm(unit='B', unit_scale=True, miniters=1, desc=DBLP_XML_ZIP) as t:
+                print("Loading existing dblp arhive file...")
+                urlretrieve("https://dblp.org/xml/release/dblp-2024-06-02.xml.gz",DBLP_XML_ZIP, reporthook=reporthook)
+            extract_dblp()
+        except:
+            raise Exception("For some reason, neither the xml or zip version of the dblp database could be found and downloading it failed.")
 
 
 
@@ -223,6 +257,10 @@ if __name__ == "__main__":
         #for the pilot, we had not yet discovered the absence of SEAMS papers due to their cataloging under conf/icse. 
         SEAMS_FIX = False
         out_csv_title+="_pilot"
+    elif("--and" in passed_options):
+        print("Using strict AND matching of keywords instead of OR")
+        do_and = True
+        out_csv_title+="_keywordand"
 
 
     elif(filter_by_title == True):

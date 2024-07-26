@@ -5,6 +5,8 @@ robotics_entries = []
 architecture_entries = []
 adaptive_entries = []
 
+print("In this version of the script, only the final selection for the revision i.e. including studies up until June 2024, relative to the original branch are made.")
+
 SEED = 1337
 DATA_SOURCE = "data/all_pilot.csv"
 PILOT_SIZE = 120
@@ -125,7 +127,38 @@ REVIEWER3 = final_set[first_share+equal_part+equal_part:] #the remaining 1/6th o
 
 
 #In the pilots, Elvin did the same selection as the other 3 so there are only 3 files each time. However, for the final selection Elvin selected from unique papers not done by the other three..
-create_reviewer_file("selection/final_selection", "finalreviewerE",ELVIN)
-create_reviewer_file("selection/final_selection", "finalreviewer1",REVIEWER1)
-create_reviewer_file("selection/final_selection", "finalreviewer2",REVIEWER2)
-create_reviewer_file("selection/final_selection", "finalreviewer3",REVIEWER3)
+# create_reviewer_file("selection/final_selection", "finalreviewerE",ELVIN)
+# create_reviewer_file("selection/final_selection", "finalreviewer1",REVIEWER1)
+# create_reviewer_file("selection/final_selection", "finalreviewer2",REVIEWER2)
+# create_reviewer_file("selection/final_selection", "finalreviewer3",REVIEWER3)
+
+####REVISION - I want to cleanly separate what was originally done and the revision, so I handle the it as a separate file below.
+
+revision_papers = []
+venue_reader = None
+with open("data/revision.csv", 'r', encoding='utf-8', newline="") as csvfile:
+    venue_reader = csv.DictReader(csvfile)
+    #next(venue_reader) #skip header
+    for row in venue_reader:
+        del row['hit num']
+        revision_papers.append(row)
+
+np.random.shuffle(revision_papers)
+
+total_num = len(revision_papers)
+
+equal_part = int(total_num/6)
+
+first_share = equal_part * 3 #Elvin does the work of 3
+print(len(revision_papers))
+
+ELVIN = revision_papers[:first_share]
+
+REVIEWER1 = revision_papers[first_share:first_share+equal_part] #reviewer1 does 1/6th
+REVIEWER2 = revision_papers[first_share+equal_part:first_share+equal_part+equal_part] #reviewer 2 does the 1/6th after that
+REVIEWER3 = revision_papers[first_share+equal_part+equal_part:] #the remaining 1/6th or so goes to reviewer3
+
+create_reviewer_file("selection/revision_selection", "finalreviewerE",ELVIN)
+create_reviewer_file("selection/revision_selection", "finalreviewer1",REVIEWER1)
+create_reviewer_file("selection/revision_selection", "finalreviewer2",REVIEWER2)
+create_reviewer_file("selection/revision_selection", "finalreviewer3",REVIEWER3)

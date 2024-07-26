@@ -65,6 +65,8 @@ MAPE_KNO = "I14 Knowledge"
 ADAP_LOG = "I9 Adap. Logic"
 YEARS = "year"
 
+REPLICATION = "I15 Replication"
+
 MULTIPLICITOUS = [CHANGE_SOURCE,CHANGE_TYPE,MECH_TYPE,MECH_SCOPE,EFFECT_PRED,ADAP_PURP,QUAL_ATT,EVAL_METRIC,ADAP_LOG,MAPE_MON,MAPE_ANA,MAPE_PLN,MAPE_EXE]
 
 horizontal_pairs = [
@@ -130,6 +132,7 @@ csv_data = {
     MAPE_KNO : [],
     ADAP_LOG: [],
     YEARS: [],
+    REPLICATION: [],
 }
 
 csv_title_to_plot_title = {
@@ -164,6 +167,7 @@ csv_title_to_plot_title = {
     MAPE_EXE : "MAPE-K: Execute",
     MAPE_KNO : "MAPE-K: Knowledge",
     ADAP_LOG: "Mechanism Approach",
+    REPLICATION: "Replication Package Linked"
 }
 
 plt.style.use('ggplot')
@@ -216,6 +220,7 @@ def RQ2():
 
     multi_df_plot(eval_poss,csv_data[EVAL_METRIC], csv_title_to_plot_title[EVAL_METRIC], "plots/Evaluation Strategies.pdf", plot_type="barh")
     barplot_paper_id_by_x(csv_data[EVAL_DEPTH],"plots/Evaluation Depth.pdf",csv_title_to_plot_title[EVAL_DEPTH],  _kind="barh")
+    barplot_paper_id_by_x(csv_data[REPLICATION],"plots/Replication Package.pdf", csv_title_to_plot_title[REPLICATION],_kind="barh")
 
     
 labels_too_long = {
@@ -422,7 +427,6 @@ if __name__ == "__main__":
             for data_key in list(csv_data.keys()):
                 csv_data[data_key].append(row[data_key])
             
-
         os.makedirs("plots/",exist_ok=True)
         plot_by_year()
 
