@@ -21,7 +21,7 @@ monitor_poss = ["Environment", "Managed System", "Mission"]
 analyze_poss = ["Comparison to threshold(s)", "Done during Plan", "Analyzing/Aggregating data", "Task/User-driven", "System State Anomaly Detection", "Logical Inference", "Other"]
 plan_poss = ["Using AI Planning Languages","Determining the optimal choice","Relying on Design-time Rules/Models"]
 execute_poss = ["Component Redeployment ","Addition &/or Removal of Component(s)","Change in Relationship(s) Between Components","Reparameterization of Component(s)"]
-logic_poss = ["search procedure","constraint solving/model checking","ontological reasoning","domain-specific algorithm","AI planner","utility calculation","numerical optimization"]
+logic_poss = ["search procedure","constraint solving/model checking","ontological reasoning","application-specific logic","AI planner","numerical optimization","graph transformation", "design-time rules"]
 
 eval_poss = ["Quality","Mission Performance","Overhead (Introduced)","Domain-specific Performance", "Resource Consumption"]
 

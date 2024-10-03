@@ -5,7 +5,9 @@ robotics_entries = []
 architecture_entries = []
 adaptive_entries = []
 
-print("In this version of the script, only the final selection for the revision i.e. including studies up until June 2024, relative to the original branch are made.")
+print("In this version of the script, only the final selection for the second revision i.e. including the keyword reconfiguration, and three new SE journals, relative to the original branch are made.")
+print("Please modify the script to fully recreate the previous phases true to the time at which they were done.")
+
 
 SEED = 1337
 DATA_SOURCE = "data/all_pilot.csv"
@@ -67,63 +69,63 @@ def create_pilot(pilot_path):
 
 
 
-with open(DATA_SOURCE, 'r', encoding='utf-8', newline="") as csvfile:
-    venue_reader = csv.DictReader(csvfile)
-    #next(venue_reader) #skip header
+# with open(DATA_SOURCE, 'r', encoding='utf-8', newline="") as csvfile:
+#     venue_reader = csv.DictReader(csvfile)
+#     #next(venue_reader) #skip header
 
-    for row in venue_reader:
-        del row['hit num']
-        category_to_list[row["venue_category"]].append(row)
-
-
-all_entries_before_pilots = architecture_entries + robotics_entries + adaptive_entries
-identifiers_before_pilots = []
-for entry in all_entries_before_pilots:
-    identifiers_before_pilots.append(entry['ee'])
+#     for row in venue_reader:
+#         del row['hit num']
+#         category_to_list[row["venue_category"]].append(row)
 
 
-create_pilot("selection/pilots/pilot_one")
-
-create_pilot("selection/pilots/pilot_two")
-
-new_stuff = []
-
-with open("data/all_filtered_by_title.csv", 'r', encoding='utf-8', newline="") as csvfile:
-    venue_reader = csv.DictReader(csvfile)
-    #next(venue_reader) #skip header
-    for row in venue_reader:
-        del row['hit num']
-        new_stuff.append(row)
+# all_entries_before_pilots = architecture_entries + robotics_entries + adaptive_entries
+# identifiers_before_pilots = []
+# for entry in all_entries_before_pilots:
+#     identifiers_before_pilots.append(entry['ee'])
 
 
-to_be_removed = []
-for entry in new_stuff: 
-    try:
-        if(entry['ee'] in identifiers_before_pilots):
-            to_be_removed.append(entry)
-    except ValueError:
-        print("err")
+# create_pilot("selection/pilots/pilot_one")
 
-for to_remove in to_be_removed: new_stuff.remove(to_remove)
+# create_pilot("selection/pilots/pilot_two")
 
-remaining_after_pilots = robotics_entries + architecture_entries + adaptive_entries
+# new_stuff = []
 
-final_set = remaining_after_pilots + new_stuff
+# with open("data/all_filtered_by_title.csv", 'r', encoding='utf-8', newline="") as csvfile:
+#     venue_reader = csv.DictReader(csvfile)
+#     #next(venue_reader) #skip header
+#     for row in venue_reader:
+#         del row['hit num']
+#         new_stuff.append(row)
 
 
-np.random.shuffle(final_set)
+# to_be_removed = []
+# for entry in new_stuff: 
+#     try:
+#         if(entry['ee'] in identifiers_before_pilots):
+#             to_be_removed.append(entry)
+#     except ValueError:
+#         print("err")
 
-total_num = len(final_set)
+# for to_remove in to_be_removed: new_stuff.remove(to_remove)
 
-equal_part = int(total_num/6)
+# remaining_after_pilots = robotics_entries + architecture_entries + adaptive_entries
 
-first_share = equal_part * 3 #Elvin does the work of 3
-print(len(final_set))
-ELVIN = final_set[:first_share]
+# final_set = remaining_after_pilots + new_stuff
 
-REVIEWER1 = final_set[first_share:first_share+equal_part] #reviewer1 does 1/6th
-REVIEWER2 = final_set[first_share+equal_part:first_share+equal_part+equal_part] #reviewer 2 does the 1/6th after that
-REVIEWER3 = final_set[first_share+equal_part+equal_part:] #the remaining 1/6th or so goes to reviewer3
+
+# np.random.shuffle(final_set)
+
+# total_num = len(final_set)
+
+# equal_part = int(total_num/6)
+
+# first_share = equal_part * 3 #Elvin does the work of 3
+# print(len(final_set))
+# ELVIN = final_set[:first_share]
+
+# REVIEWER1 = final_set[first_share:first_share+equal_part] #reviewer1 does 1/6th
+# REVIEWER2 = final_set[first_share+equal_part:first_share+equal_part+equal_part] #reviewer 2 does the 1/6th after that
+# REVIEWER3 = final_set[first_share+equal_part+equal_part:] #the remaining 1/6th or so goes to reviewer3
 
 
 #In the pilots, Elvin did the same selection as the other 3 so there are only 3 files each time. However, for the final selection Elvin selected from unique papers not done by the other three..
@@ -134,11 +136,43 @@ REVIEWER3 = final_set[first_share+equal_part+equal_part:] #the remaining 1/6th o
 
 ####REVISION - I want to cleanly separate what was originally done and the revision, so I handle the it as a separate file below.
 
+# revision_papers = []
+# venue_reader = None
+# with open("data/revision.csv", 'r', encoding='utf-8', newline="") as csvfile:
+#     venue_reader = csv.DictReader(csvfile)
+#     #next(venue_reader) #skip header
+#     for row in venue_reader:
+#         del row['hit num']
+#         revision_papers.append(row)
+
+# np.random.shuffle(revision_papers)
+
+# total_num = len(revision_papers)
+
+# equal_part = int(total_num/6)
+
+# first_share = equal_part * 3 #Elvin does the work of 3
+# print(len(revision_papers))
+
+# ELVIN = revision_papers[:first_share]
+
+# REVIEWER1 = revision_papers[first_share:first_share+equal_part] #reviewer1 does 1/6th
+# REVIEWER2 = revision_papers[first_share+equal_part:first_share+equal_part+equal_part] #reviewer 2 does the 1/6th after that
+# REVIEWER3 = revision_papers[first_share+equal_part+equal_part:] #the remaining 1/6th or so goes to reviewer3
+
+# create_reviewer_file("selection/revision_selection", "finalreviewerE",ELVIN)
+# create_reviewer_file("selection/revision_selection", "finalreviewer1",REVIEWER1)
+# create_reviewer_file("selection/revision_selection", "finalreviewer2",REVIEWER2)
+# create_reviewer_file("selection/revision_selection", "finalreviewer3",REVIEWER3)
+
+####REVISION - I want to cleanly separate what was originally done and the second revision, so I handle the it as a separate file below.
+np.random.seed(SEED) #resetting the seed so I don't need to rerun the above.
 revision_papers = []
 venue_reader = None
-with open("data/revision.csv", 'r', encoding='utf-8', newline="") as csvfile:
+with open("data/second_revision.csv", 'r', encoding='utf-8', newline="") as csvfile:
     venue_reader = csv.DictReader(csvfile)
     #next(venue_reader) #skip header
+    
     for row in venue_reader:
         del row['hit num']
         revision_papers.append(row)
@@ -158,7 +192,7 @@ REVIEWER1 = revision_papers[first_share:first_share+equal_part] #reviewer1 does 
 REVIEWER2 = revision_papers[first_share+equal_part:first_share+equal_part+equal_part] #reviewer 2 does the 1/6th after that
 REVIEWER3 = revision_papers[first_share+equal_part+equal_part:] #the remaining 1/6th or so goes to reviewer3
 
-create_reviewer_file("selection/revision_selection", "finalreviewerE",ELVIN)
-create_reviewer_file("selection/revision_selection", "finalreviewer1",REVIEWER1)
-create_reviewer_file("selection/revision_selection", "finalreviewer2",REVIEWER2)
-create_reviewer_file("selection/revision_selection", "finalreviewer3",REVIEWER3)
+create_reviewer_file("selection/sssecond_revision_selection", "finalreviewerE",ELVIN)
+create_reviewer_file("selection/sssecond_revision_selection", "finalreviewer1",REVIEWER1)
+create_reviewer_file("selection/sssecond_revision_selection", "finalreviewer2",REVIEWER2)
+create_reviewer_file("selection/sssecond_revision_selection", "finalreviewer3",REVIEWER3)

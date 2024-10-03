@@ -44,7 +44,7 @@ SAS_VENUES = tuple([
     'journals/taas/'
 ])
 
-REVIEW_VENUES = tuple(
+SE_VENUES = tuple(
     [
         'journals/sosym/',
         'journals/tse/',
@@ -56,25 +56,28 @@ venue_to_category = {
     SA_VENUES : "Software_Architecture",
     RO_VENUES : "Robotics",
     SAS_VENUES : "Self-Adaptive_Systems",
-    REVIEW_VENUES : "Suggested by Review"
+    SE_VENUES : "Software_Engineering"
 }
 
 ARCHITECTURE_KWORDS = ["architect"]
 ROBOTICS_KWORDS = ["robot"]
-SAS_KWORDS = ["self-", "adapt"]
+SAS_KWORDS = ["self-", "adapt", "reconfigur", "re-configur"]
+
 
 FROM_ROBOTICS = ARCHITECTURE_KWORDS + SAS_KWORDS
 FROM_SOFTWARE = ROBOTICS_KWORDS + SAS_KWORDS
 FROM_SAS = ROBOTICS_KWORDS + ARCHITECTURE_KWORDS
+FROM_SE = ARCHITECTURE_KWORDS + SAS_KWORDS + ROBOTICS_KWORDS
 
 venue_to_words = {
     SA_VENUES : FROM_SOFTWARE,
     RO_VENUES : FROM_ROBOTICS,
-    SAS_VENUES : FROM_SAS
+    SAS_VENUES : FROM_SAS,
+    SE_VENUES : FROM_SE
 }
 
 filter_by_title = True
-out_csv_title = "data/revise_all"
+out_csv_title = "data/second_revision_all"
 do_and = False
 
 
@@ -162,6 +165,7 @@ def parse_entries():
     ro_counter = [0]
     sa_counter = [0]
     sas_counter = [0]
+    se_counter = [0]
 
     for dblp_entry in iterate_xml(DBLP_XML):
         key = dblp_entry.get('key')
@@ -174,14 +178,18 @@ def parse_entries():
 
             if(filter_by_title):
                 match_robotics = title_criteria(key,RO_VENUES, title, ro_counter,keywords_and=do_and)
-                match_software = title_criteria(key,SA_VENUES, title, sa_counter,keywords_and=do_and)
+                match_software_arch = title_criteria(key,SA_VENUES, title, sa_counter,keywords_and=do_and)
                 match_adaptive = title_criteria(key, SAS_VENUES, title, sas_counter, dblp_entry=dblp_entry,keywords_and=do_and)
+                match_software_eng = title_criteria(key, SE_VENUES, title, se_counter, keywords_and=do_and)
+
             else:
                 match_robotics = venue_criteria(key,RO_VENUES, ro_counter)
-                match_software = venue_criteria(key,SA_VENUES, sa_counter)
+                match_software_arch = venue_criteria(key,SA_VENUES, sa_counter)
                 match_adaptive = venue_criteria(key, SAS_VENUES, sas_counter, dblp_entry=dblp_entry)
+                match_software_eng = venue_criteria(key, SE_VENUES, se_counter)
+
         
-            matched_criteria = match_robotics or match_software or match_adaptive # or match_review
+            matched_criteria = match_robotics or match_software_arch or match_adaptive or match_software_eng
             if(matched_criteria): #an any with extra steps to get the return value in a variable.
                 # add to result.
                 # Merge the names of all authors of the work.
@@ -208,7 +216,7 @@ def parse_entries():
     if SEAMS_FIX:
         append_joser(writer)
     # Parse all entries in the DBLP database.
-    print("TOTAL HITS : " + str(HITS) + " ROBOTICS HITS: " + str(ro_counter[0]) + " ARCHITECTURE HITS: " + str(sa_counter[0]) + " SAS HITS: " + str(sas_counter[0]), end="")
+    print("TOTAL HITS : " + str(HITS) + " ROBOTICS HITS: " + str(ro_counter[0]) + " ARCHITECTURE HITS: " + str(sa_counter[0]) + " SAS HITS: " + str(sas_counter[0]) + " REV HITS: " + str(se_counter[0]), end="")
     print("")
 
 
