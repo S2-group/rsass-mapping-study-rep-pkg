@@ -189,7 +189,7 @@ def parse_entries():
                 match_software_eng = venue_criteria(key, SE_VENUES, se_counter)
 
         
-            matched_criteria = match_robotics or match_software_arch or match_adaptive or match_software_eng
+            matched_criteria = match_robotics or match_software_arch or match_adaptive or (match_software_eng and SEAMS_FIX)
             if(matched_criteria): #an any with extra steps to get the return value in a variable.
                 # add to result.
                 # Merge the names of all authors of the work.
@@ -261,7 +261,7 @@ if __name__ == "__main__":
         filter_by_title = False
         print("Collecting all studies for each venue's proceedings")
     elif("--pilot" in passed_options):
-        print("Collecting the studies, but not accounting for SEAMS patch, which is the version used for the two pilots.")
+        print("Collecting the studies, but not accounting for SEAMS patch or SE journal venues, which is the version used for the two pilots.")
         #for the pilot, we had not yet discovered the absence of SEAMS papers due to their cataloging under conf/icse. 
         SEAMS_FIX = False
         out_csv_title+="_pilot"
