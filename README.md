@@ -1,19 +1,25 @@
 # Software Architecture-based Self-adaptation in Robotics
-This repository is a companion page for the following (pending) publication:
-Alberts, E., Gerostathopoulos, I., Malavolta, I., Hernández Corbato, C., & Lago, P. 2024. Software Architecture-Based Self-Adaptation in Robotics. SSRN
+This repository is a companion page for the following publication:
+Alberts, E., Gerostathopoulos, I., Malavolta, I., Hernández Corbato, C., & Lago, P. 2025. Software Architecture-Based Self-Adaptation in Robotics. JSS
 
 It contains all the material required for replicating the study, including: a script to re-do the proceedings collection, title keyword filtering, and generate the plots.
 
 ## How to cite us
-The scientific article describing design, execution, and main results of this study is available [here](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4805883).<br> 
+The scientific article describing design, execution, and main results of this study is available [here](https://doi.org/10.1016/j.jss.2024.112258).<br> 
 If this study is helping your research, consider to cite it is as follows, thanks!
 
 ```
-@article{alberts2024software,
-  title={Software Architecture-Based Self-Adaptation in Robotics},
-  author={Alberts, Elvin and Gerostathopoulos, Ilias and Malavolta, Ivano and Hern{\'a}ndez Corbato, Carlos and Lago, Patricia},
-  journal={Available at SSRN 4805883}
-  year={2024}
+@article{alberts2025software,
+title = {Software architecture-based self-adaptation in robotics},
+journal = {Journal of Systems and Software},
+volume = {219},
+pages = {112258},
+year = {2025},
+issn = {0164-1212},
+doi = {https://doi.org/10.1016/j.jss.2024.112258},
+url = {https://www.sciencedirect.com/science/article/pii/S0164121224003029},
+author = {Elvin Alberts and Ilias Gerostathopoulos and Ivano Malavolta and Carlos {Hernández Corbato} and Patricia Lago},
+keywords = {Software architecture, Self-adaptation, Robotics, Systematic mapping study},
 }
 ```
 
@@ -26,7 +32,7 @@ If this study is helping your research, consider to cite it is as follows, thank
 
 3. Here we will cover proceedings_collection.py. This script parses the XML of the dblp snapshot, and collected potentially-relevant studies in accordance with the procedure and time criteria outlined in our study. There are two arguments/options that can be passed to the script `--all` and `--pilot`. The first option, `--all` means we collect every single study without filtering by their titles. This allows the user to try different keywords manually to determine how many studies this may result in, and aids in the transparency of the filtering process. By default, the title keyword filtering is applied if the `--all` option is not specified. The second option `--pilot` produces the .csv of potentially-relevant as it was used for the pilot studies. This distinction exists as between the pilot studies and the final selection we uncovered that the proceedings of some years of the SEAMS conference which we target, are misleadingly categorized under the ICSE conference (with which it is co-located) which we do not target. We remedied this after the pilot, meaning the seeded randomized extraction of potentially-relevant studies was no longer reproducible without maintaining these two distinct versions.
 
-4. For pilots_and_final.py to be able to use this script fully, it requires having run the proceedings_collection.py script prior. In this branch of the repository, it is only possible to generate the new selection round after the study has been updated to include 2023-June 2024. For instructions on generating the pilot selections and original final selection please see the other branch.
+4. For pilots_and_final.py to be able to use this script fully, it requires having run the proceedings_collection.py script prior. In this branch of the repository, it is only possible to generate the new selection round after the study has been updated to include 2023-June 2024. For instructions on generating the pilot selections and original final selection please see the other branches.
 
 5. For generate_plots.py this script generates a bar plot for every data parameter from the vertical analysis. This will generate all those found in our paper, but also those we did not include but use to report on the results. There is one option which can be passed to this script `--show` this makes it so that the plots are displayed to the user one by one rather than saved in a folder called plots. This is useful if you are modifying the script and would not like to overwrite previous versions of the plots.
 
